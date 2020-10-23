@@ -1,0 +1,34 @@
+OUT        = program
+SRC        = ${wildcard *.c}
+OBJ        = ${SRC:.c=.o}
+DEPENDS    = .depends
+
+CFLAGS    += -g -O2 -Wall
+LDFLAGS   += 
+
+PREFIX    ?= /usr/local
+MANPREFIX ?= ${PREFIX}/share/man
+
+all: ${OUT}
+
+${OUT}: ${OBJ}
+	${CC} -o $@ ${OBJ} ${LDFLAGS}
+
+.c.o:
+	${CC} -c -o $@ $< ${CFLAGS}
+
+${DEPENDS}: ${SRC}
+	${RM} -f ./${DEPENDS}
+	${CC} ${CFLAGS} -MM $^ >> ./${DEPENDS}
+
+install:
+	install -Dm755 ${OUT} ${DESTDIR}${PREFIX}/bin/${OUT}
+    
+uninstall:
+	${RM} ${DESTDIR}${PREFIX}/bin/${OUT}
+
+clean:
+	${RM} ${OUT} ${OBJ} ${DEPENDS}
+
+-include ${DEPENDS}
+.PHONY: all install uninstall clean

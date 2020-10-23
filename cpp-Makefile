@@ -1,0 +1,34 @@
+OUT        = program
+SRC        = ${wildcard *.cpp}
+OBJ        = ${SRC:.cpp=.o}
+DEPENDS    = .depends
+
+CXXFLAGS  += -g -O2 -Wall -std=c++11
+LDFLAGS   += 
+
+PREFIX    ?= /usr/local
+MANPREFIX ?= ${PREFIX}/share/man
+
+all: ${OUT}
+
+${OUT}: ${OBJ}
+	${CXX} -o $@ ${OBJ} ${LDFLAGS}
+
+.cpp.o:
+	${CXX} -c -o $@ $< ${CXXFLAGS}
+
+${DEPENDS}: ${SRC}
+	${RM} -f ./${DEPENDS}
+	${CXX} ${CXXFLAGS} -MM $^ >> ./${DEPENDS}
+
+install:
+	install -Dm755 ${OUT} ${DESTDIR}${PREFIX}/bin/${OUT}
+    
+uninstall:
+	${RM} ${DESTDIR}${PREFIX}/bin/${OUT}
+
+clean:
+	${RM} ${OUT} ${OBJ} ${DEPENDS}
+
+-include ${DEPENDS}
+.PHONY: all install uninstall clean

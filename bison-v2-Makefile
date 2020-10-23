@@ -1,0 +1,41 @@
+OUT    = program
+FLEX  ?= flex
+BISON ?= bison
+DEPENDS = .depends
+
+CXXFLAGS += -std=c++11
+LDFLAGS  += 
+
+YSRC   = ${wildcard *.y}
+YOBJ   = ${YSRC:.y=.tab.cpp}
+YDEF   = ${YSRC:.y=.tab.hpp}
+
+LSRC   = ${wildcard *.l}
+LOBJ   = ${LSRC:.l=.lex.cpp}
+
+SRC    = $(filter-out ${YOBJ} ${LOBJ},${wildcard *.cpp})
+OBJ    = ${SRC:.cpp=.o}
+
+all: ${OUT}
+
+${OUT}: ${YOBJ} ${LOBJ} ${OBJ}
+	${CXX} -o ${OUT} ${YOBJ} ${LOBJ} ${OBJ} ${CXXFLAGS}
+
+.cpp.o:
+	${CXX} -c -o $@ $< ${CXXFLAGS}
+
+${DEPENDS}: ${SRC} ${YOBJ} ${LOBJ}
+	${RM} -f ./${DEPENDS}
+	${CXX} ${CXXFLAGS} -MM $^ >> ./${DEPENDS}
+
+${YOBJ} ${YDEF}: ${YSRC}
+	${BISON} -o $@ -d $<
+
+${LOBJ}: ${LSRC}
+	${FLEX} -o $@ $<
+
+clean:
+	${RM} ${OUT} ${OBJ} ${YOBJ} ${YDEF} ${LOBJ} ${COBJ} stack.hh
+
+-include ${DEPENDS}
+.PHONY: all clean

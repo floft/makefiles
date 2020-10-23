@@ -1,0 +1,28 @@
+OUT    = program
+FLEX  ?= flex
+BISON ?= bison
+
+CXXFLAGS += -std=c++11
+
+YSRC   = ${wildcard *.y}
+YOBJ   = ${YSRC:.y=.tab.cpp}
+YDEF   = ${YSRC:.y=.tab.hpp}
+
+LSRC   = ${wildcard *.l}
+LOBJ   = ${LSRC:.l=.lex.cpp}
+
+all: ${OUT}
+
+${OUT}: ${YOBJ} ${LOBJ}
+	${CXX} -o ${OUT} ${YOBJ} ${LOBJ} ${CXXFLAGS}
+
+${YOBJ} ${YDEF}: ${YSRC}
+	${BISON} -o $@ -d $<
+
+${LOBJ}: ${LSRC}
+	${FLEX} -o $@ $<
+
+clean:
+	${RM} ${OUT} ${YOBJ} ${YDEF} ${LOBJ} ${COBJ}
+
+.PHONY: all clean
